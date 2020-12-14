@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <time.h>
+
+	typedef struct {
+		short int ETQ;
+		short int Datos[8];
+		} TLineaCache;
+		
+	typedef TLineaCache ArrayCache[4];
+	
+//int inicializar(ArrayCache* RAM);
+//int inicializarRAM(unsigned char*RAM[1024]);
+//void leeDireccion(int* linea);
+
+
+void inicializar(ArrayCache* cache){
+	
+	for(int i = 0; i < 4; i++){
+		cache[i]->ETQ = 255;
+		
+		for(int j = 0; j < 8; j++){
+			cache[i]->Datos[j] = 0;
+			
+		}	
+	}	
+}
+
+
+void falloCache(ArrayCache* cache, char* ram, int linea, int* numfallos){
+	int lane = (linea >> 3) &3;
+	int etq = linea >> 5;
+	if (cache[lane] -> ETQ != etq){
+		
+		//Incrementamos el valor de numfallos
+		numfallos++;
+		
+		//Siendo T el instante, escribo la siguiente linea con texto
+		//printf("T: %d, falloCache, %d, ADDR, %04X  ETQ  %X linea %02X palabra %02X bloque %02X", , *numfallos, linea, etq, lane, linea & 7, linea>>3);
+	}
+}
+
+
+int leeDireccion(ArrayCache* cache, char* ram, int* inter){
+	int lectura = *inter;
+	FILE *f2;
+	int lineaAUX;
+	int numfallos = 0;
+	
+	
+	//Abrimos el archivo y comprobamos que se ha abierto correctamente
+	f2 = fopen("accesos_memoria.txt", "rt");
+		if(f2 == NULL){
+			printf("No se ha podido encontrar el fichero accesos_memoria.txt");
+			lectura = -1;
+		}
+
+	
+	
+	else{
+		//Mientras no se llegue al final del archivo, el bucle sigue leyendo lineas
+		while(!feof(f2)){
+			fscanf(f2, "%X", &lineaAUX);
+			
+			falloCache(cache, ram, lineaAUX, &numfallos);
+			
+		}	
+	}	
+	
+	return lectura;
+}
+
+//Función SLEEP
+void sleep(){
+	sleep(2000);
+}
+
+
+int main(){
+	//variable que utilizamos para comprobar si se han leido bien los fichero o el bucle ha terminado. si fin esta en -1 no entrara en el bucle
+	int fin = 0;
+	
+	//inicializamos la variable cache y asignamos valor en la funcion inicializar
+	ArrayCache cache;
+	inicializar(&cache);
+	
+		//Inicializamos el array de chars que llamamos RAM
+		char RAM[1024];
+		FILE *f1;
+	
+		//Apertura del fichero binario
+		f1 = fopen("RAM.bin", "r");
+	
+	
+		//Comprobar que el fichero ha sido abierto correctamente
+		if(f1 == NULL){
+			
+			printf("No se puede abrir el fichero RAM.bin");
+		}
+		
+		else{
+			fread(RAM, sizeof(RAM), 1, f1);
+		}
+	
+	//Utilizamos un bucle donde lea linea por linea los accesos que se quieren hacer, hasta llegar al final del fichero accesos_memoria.txt
+	int linea = 0;
+	
+	leeDireccion(&cache,RAM, &fin);
+	printf("%d", linea);
+					
+	//Función SLEEP (2 mil milisegundos)
+	sleep(2000);
+	
+	return 0;
+}
