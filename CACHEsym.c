@@ -24,32 +24,6 @@ void inicializar(ArrayCache* cache){
 	}	
 }
 
-int inicializarRAM(char* RAM[1024]){
-	int result = 0;
-	char AUX[1024];
-	FILE *f1;
-	
-	//Apertura del fichero binario
-	f1 = fopen("RAM.bin", "r");
-	
-	
-	//Comprobar que el fichero ha sido abierto correctamente
-	if(f1==NULL){
-		printf("No se puede abrir el fichero RAM.bin");
-		result = -1;
-		
-		}
-		
-	else{
-		fread(AUX, sizeof(AUX), 1, f1);
-		*RAM = AUX;
-	
-	}
-	return result;
-
-}
-
-
 int leeDireccion(int* linea){
 	int lectura = 0;
 	FILE *f2;
@@ -67,8 +41,10 @@ int leeDireccion(int* linea){
 			fscanf(f2, "%X", &lineaAUX);
 			*linea = lineaAUX;
 		}
-		else 
+		else {
+			printf("Fin del archvio");
 			lectura = -1;
+		}
 	}	
 	
 	return lectura;
@@ -85,9 +61,22 @@ int main(){
 	ArrayCache cache;
 	inicializar(&cache);
 	
-	//Inicializamos el array de chars que llamamos RAM
-	char RAM[1024];
-	fin = inicializarRAM(&RAM[1024]);
+		//Inicializamos el array de chars que llamamos RAM
+		char RAM[1024];
+		FILE *f1;
+	
+		//Apertura del fichero binario
+		f1 = fopen("RAM.bin", "r");
+	
+	
+		//Comprobar que el fichero ha sido abierto correctamente
+		if(f1==NULL){
+			printf("No se puede abrir el fichero RAM.bin");
+			}
+		
+		else{
+			fread(RAM, sizeof(RAM), 1, f1);
+		}
 	
 	//Utilizamos un bucle donde lea linea por linea los accesos que se quieren hacer, hasta llegar al final del fichero accesos_memoria.txt
 	int linea;
